@@ -833,7 +833,7 @@ CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
                     var label_hor_side = (body_size.w - data.center_x) < data.center_x ? 'left' : 'right';
                     var label_ver_side = (body_size.h - data.center_y) < data.center_y ? 'top' : 'bottom';
                     var label_shift = 150;
-                    var label_margin = 40;
+                    var label_margin = data.label_margin || 40;
                     var label_shift_with_label_width = label_shift + label_width + label_margin;
                     var label_shift_with_label_height = label_shift + label_height + label_margin;
                     var label_hor_offset = half_w + label_shift;
@@ -843,9 +843,59 @@ CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
                     var label_y = (label_ver_side == 'top') ? data.center_y - label_ver_offset - label_height : data.center_y + label_ver_offset;
                     var label_x = window.innerWidth / 2 - label_width / 2;
 
-                    if (top_offset < label_shift_with_label_height && bottom_offset < label_shift_with_label_height) {
+                    
 
-                        label_y = data.center_y + label_margin;
+                    if (that.stepData.position) {
+                        switch (that.stepData.position) {
+                            case 'top': {
+                                label_y = shape_data.top - label_margin - label_height;
+                                label_x = shape_data.x;
+                                break
+                            }
+                            case 'top-left': {
+                                label_y = shape_data.top - label_margin - label_height;
+                                label_x = shape_data.left - label_margin - label_width;
+                                break
+                            }
+                            case 'top-right': {
+                                label_y = shape_data.top - label_margin - label_height;
+                                label_x = shape_data.right + label_margin;
+                                break
+                            }
+                            case 'bottom': {
+                                label_y = shape_data.bottom + label_margin;
+                                label_x = shape_data.x;
+                                break
+                            }
+                            case 'bottom-left': {
+                                label_y = shape_data.bottom + label_margin;
+                                label_x = shape_data.left - label_margin - label_width;
+                                break
+                            }
+                            case 'bottom-right': {
+                                label_y = shape_data.bottom + label_margin;
+                                label_x = shape_data.right + label_margin;
+                                break
+                            }
+                            case 'left': {
+                                label_y = shape_data.y;
+                                label_x = shape_data.left - label_margin - label_width;
+                                break
+                            }
+                            case 'right': {
+                                label_y = shape_data.y;
+                                label_x = shape_data.right + label_margin;
+                                break
+                            }
+                            default: {
+                                return
+                            }
+                        }
+                    } else {
+                        if (top_offset < label_shift_with_label_height && bottom_offset < label_shift_with_label_height) {
+
+                            label_y = data.center_y + label_margin;
+                        }
                     }
 
                     if (window.innerWidth <= 640) {

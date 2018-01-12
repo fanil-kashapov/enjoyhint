@@ -63,7 +63,7 @@ var EnjoyHint = function (_options) {
     };
 
     var destroyEnjoy = function () {
-
+        current_step = 0;
         $('.enjoyhint').remove();
         $body.css({'overflow':'auto'});
         $(document).off("touchmove", lockTouch);
@@ -105,6 +105,16 @@ var EnjoyHint = function (_options) {
             step_data.onBeforeStart();
         }
 
+        if (step_data.invokeByPromisse) {
+            step_data.invokeByPromisse().then(function () {
+                invokeAction(step_data);
+            })
+        } else {
+            invokeAction(step_data);
+        }
+    };
+
+    var invokeAction = function (step_data) {
         var timeout = step_data.timeout || 0;
 
         setTimeout(function () {
@@ -150,17 +160,19 @@ var EnjoyHint = function (_options) {
                 }
 
                 if (!step_data.event_type && step_data.event == "key") {
-
-                    $element.keydown(function (event) {
+                    var handler = function (event) {
 
                         if (event.which == step_data.keyCode) {
 
                             current_step++;
                             stepAction();
+                            $(this).unbind('keydown', handler);
                         }
-                    });
-                }
+                    }
 
+                    $element.keydown(handler);                
+                }
+                
                 if (step_data.showNext == true) {
 
                     $body.enjoyhint('show_next');
@@ -271,7 +283,9 @@ var EnjoyHint = function (_options) {
                     left: step_data.left,
                     right: step_data.right,
                     margin: step_data.margin,
-                    scroll: step_data.scroll
+                    scroll: step_data.scroll,
+                    position: step_data.position,
+                    label_margin: step_data.label_margin
                 };
 
                 if (step_data.shape && step_data.shape == 'circle') {
@@ -290,6 +304,15 @@ var EnjoyHint = function (_options) {
         }, timeout);
     };
 
+    var keyDown = function (event) {
+
+        if (event.which == data[current_step].keyCode) {
+
+            current_step++;
+            stepAction();
+        }
+    }
+
     var nextStep = function() {
 
         current_step++;
@@ -298,11 +321,18 @@ var EnjoyHint = function (_options) {
 
     var skipAll = function() {
 
-        var step_data = data[current_step];
-        var $element = $(step_data.selector);
+        // var step_data = data[current_step];
+        // var $element = $(step_data.selector);
 
-        off(step_data.event);
-        $element.off(makeEventName(step_data.event));
+        // off(data[current_step].event);
+        // $element.off(makeEventName(step_data.event));
+
+        for (var step in data) {
+            off(data[current_step].event);
+            $(body).off(data[current_step].selector, 'keyDown', keyDown)
+            
+            $(data[current_step].selector).off(makeEventName(data[current_step].event));
+        }
 
         destroyEnjoy();
     };
@@ -378,6 +408,9 @@ var EnjoyHint = function (_options) {
             case 'skip':
 
                 skipAll();
+                break;
+            default: 
+                $body.trigger(makeEventName(event_name, true));
                 break;
         }
     };
