@@ -304,15 +304,6 @@ var EnjoyHint = function (_options) {
         }, timeout);
     };
 
-    var keyDown = function (event) {
-
-        if (event.which == data[current_step].keyCode) {
-
-            current_step++;
-            stepAction();
-        }
-    }
-
     var nextStep = function() {
 
         current_step++;
@@ -329,8 +320,6 @@ var EnjoyHint = function (_options) {
 
         for (var step in data) {
             off(data[current_step].event);
-            $(body).off(data[current_step].selector, 'keyDown', keyDown)
-            
             $(data[current_step].selector).off(makeEventName(data[current_step].event));
         }
 
